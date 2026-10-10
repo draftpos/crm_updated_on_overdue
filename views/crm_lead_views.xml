@@ -228,23 +228,23 @@
                         domain="[('write_date', '&gt;=', (context_today() - datetime.timedelta(days=365)).strftime('%Y-%m-%d 00:00:00'))]"/>
                 <filter string="Updated On (Date Drilldown)" name="filter_write_date_drilldown" date="write_date"/>
                 <separator/>
-                <!-- Overdue Filters (Starting from today going back) -->
+                <!-- Overdue Filters (Starting from today going back - Indexed High Speed) -->
                 <filter string="Overdue (Today &amp; Past)" name="overdue_today_past"
-                        domain="[('activity_date_deadline', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                        domain="[('activity_ids.date_deadline', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="My Overdue (Today &amp; Past)" name="my_overdue_today_past"
-                        domain="[('my_activity_date_deadline', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                        domain="[('activity_ids.date_deadline', '&lt;=', context_today().strftime('%Y-%m-%d')), ('activity_ids.user_id', '=', uid)]"/>
                 <filter string="Overdue: Past Only (&lt; Today)" name="overdue_strictly_past"
-                        domain="[('activity_date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+                        domain="[('activity_ids.date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Overdue: Today" name="overdue_today"
-                        domain="[('activity_date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                        domain="[('activity_ids.date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Overdue: Yesterday" name="overdue_yesterday"
-                        domain="[('activity_date_deadline', '=', (context_today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]"/>
+                        domain="[('activity_ids.date_deadline', '=', (context_today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]"/>
                 <filter string="Overdue: Last 7 Days" name="overdue_last_7_days"
-                        domain="[('activity_date_deadline', '&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d')),
-                                 ('activity_date_deadline', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                        domain="[('activity_ids.date_deadline', '&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d')),
+                                 ('activity_ids.date_deadline', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Overdue: Last 30 Days" name="overdue_last_30_days"
-                        domain="[('activity_date_deadline', '&gt;=', (context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d')),
-                                 ('activity_date_deadline', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                        domain="[('activity_ids.date_deadline', '&gt;=', (context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d')),
+                                 ('activity_ids.date_deadline', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
                 <filter string="Overdue Next Contact Date" name="overdue_next_contact"
                         domain="[('custom_next_contact_date', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
                 <separator/>
@@ -268,7 +268,7 @@
         <field name="model">crm.lead</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">
-            <list string="Updated Opportunities" sample="1" multi_edit="1" js_class="crm_business_cards_scanner_list" default_order="write_date desc, id desc" limit="1000">
+            <list string="Updated Opportunities" sample="1" multi_edit="1" js_class="crm_business_cards_scanner_list" default_order="write_date desc, id desc">
                 <header>
                     <button name="%(crm.crm_lead_lost_action)d" type="action" string="Mark Lost"/>
                     <button name="%(crm.action_lead_mass_mail)d" type="action" string="Email"/>
@@ -299,7 +299,7 @@
         <field name="model">crm.lead</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">
-            <list string="Overdue Leads" sample="1" multi_edit="1" js_class="crm_business_cards_scanner_list" default_order="priority desc, create_date desc, id desc" limit="1000">
+            <list string="Overdue Leads" sample="1" multi_edit="1" js_class="crm_business_cards_scanner_list" default_order="priority desc, create_date desc, id desc">
                 <header>
                     <button name="%(crm.crm_lead_lost_action)d" type="action" string="Mark Lost"/>
                     <button name="%(crm.action_lead_mass_mail)d" type="action" string="Email"/>
@@ -366,7 +366,6 @@
         <field name="view_mode">list,kanban,graph,pivot,calendar,activity,form</field>
         <field name="search_view_id" ref="crm.view_crm_case_opportunities_filter"/>
         <field name="view_id" ref="crm_lead_view_tree_updated_on"/>
-        <field name="limit">1000</field>
         <field name="context">{
             'default_type': 'opportunity',
             'search_default_updated_today': 1,
@@ -395,7 +394,6 @@
         <field name="view_mode">list,kanban,graph,pivot,calendar,activity,form</field>
         <field name="search_view_id" ref="crm.view_crm_case_opportunities_filter"/>
         <field name="view_id" ref="crm_lead_view_tree_overdue"/>
-        <field name="limit">1000</field>
         <field name="context">{
             'default_type': 'opportunity',
             'search_default_overdue_today_past': 1,

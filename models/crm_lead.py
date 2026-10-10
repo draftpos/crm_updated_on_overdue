@@ -259,12 +259,14 @@ class CrmLead(models.Model):
     my_activity_date_deadline = fields.Date(
         string='My Deadline',
         compute='_compute_my_activity_date_deadline',
+        search='_search_my_activity_date_deadline',
         help='Deadline of the latest chatter message, activity, or To-Do on this lead.'
     )
 
     activity_date_deadline = fields.Date(
         string='Next Activity Deadline',
         compute='_compute_my_activity_date_deadline',
+        search='_search_activity_date_deadline',
         help='Deadline of the latest chatter message, activity, or To-Do on this lead.'
     )
 
@@ -379,5 +381,11 @@ class CrmLead(models.Model):
             latest_date = max(dates) if dates else False
             record.my_activity_date_deadline = latest_date
             record.activity_date_deadline = latest_date
+
+    def _search_activity_date_deadline(self, operator, operand):
+        return [('activity_ids.date_deadline', operator, operand)]
+
+    def _search_my_activity_date_deadline(self, operator, operand):
+        return [('activity_ids.date_deadline', operator, operand), ('activity_ids.user_id', '=', self.env.uid)]
 
 
