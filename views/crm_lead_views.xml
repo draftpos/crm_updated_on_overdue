@@ -214,14 +214,117 @@
                                  ('activity_date_deadline', '&lt;=', context_today().strftime('%Y-12-31'))]"/>
                 <filter string="Deadline (Date Drilldown)" name="filter_activity_date_deadline" date="activity_date_deadline"/>
                 <separator/>
+                <!-- Update Date Filters -->
+                <filter string="Updated: Today" name="updated_today"
+                        domain="[('write_date', '&gt;=', context_today().strftime('%Y-%m-%d 00:00:00')),
+                                 ('write_date', '&lt;=', context_today().strftime('%Y-%m-%d 23:59:59'))]"/>
+                <filter string="Updated: Yesterday" name="updated_yesterday"
+                        domain="[('write_date', '&gt;=', (context_today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d 00:00:00')),
+                                 ('write_date', '&lt;=', (context_today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d 23:59:59'))]"/>
+                <filter string="Updated: Last Hour" name="updated_last_hour"
+                        domain="[('write_date', '&gt;=', (datetime.datetime.now() - datetime.timedelta(hours=1)).strftime('%Y-%m-%d %H:%M:%S'))]"/>
+                <filter string="Updated: Last Week (7 Days)" name="updated_last_week"
+                        domain="[('write_date', '&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d 00:00:00'))]"/>
+                <filter string="Updated: Last Month (30 Days)" name="updated_last_month"
+                        domain="[('write_date', '&gt;=', (context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d 00:00:00'))]"/>
+                <filter string="Updated: Last Year (365 Days)" name="updated_last_year"
+                        domain="[('write_date', '&gt;=', (context_today() - datetime.timedelta(days=365)).strftime('%Y-%m-%d 00:00:00'))]"/>
+                <filter string="Updated On (Date Drilldown)" name="filter_write_date_drilldown" date="write_date"/>
+                <separator/>
+                <!-- Overdue Filters (Starting from today going back) -->
+                <filter string="Overdue (Today &amp; Past)" name="overdue_today_past"
+                        domain="[('activity_date_deadline', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="My Overdue (Today &amp; Past)" name="my_overdue_today_past"
+                        domain="[('my_activity_date_deadline', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Overdue: Past Only (&lt; Today)" name="overdue_strictly_past"
+                        domain="[('activity_date_deadline', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Overdue: Today" name="overdue_today"
+                        domain="[('activity_date_deadline', '=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Overdue: Yesterday" name="overdue_yesterday"
+                        domain="[('activity_date_deadline', '=', (context_today() - datetime.timedelta(days=1)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Overdue: Last 7 Days" name="overdue_last_7_days"
+                        domain="[('activity_date_deadline', '&gt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d')),
+                                 ('activity_date_deadline', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Overdue: Last 30 Days" name="overdue_last_30_days"
+                        domain="[('activity_date_deadline', '&gt;=', (context_today() - datetime.timedelta(days=30)).strftime('%Y-%m-%d')),
+                                 ('activity_date_deadline', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter string="Overdue Next Contact Date" name="overdue_next_contact"
+                        domain="[('custom_next_contact_date', '&lt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <separator/>
             </xpath>
             <xpath expr="//group" position="inside">
                 <filter string="Created By" name="group_by_create_uid" context="{'group_by': 'create_uid'}"/>
                 <filter string="Salesperson" name="group_by_salesperson" context="{'group_by': 'user_id'}"/>
                 <filter string="Response Status" name="group_by_response_status" context="{'group_by': 'custom_response_status'}"/>
+                <filter string="Updated By" name="group_by_write_uid" context="{'group_by': 'write_uid'}"/>
                 <filter string="Creation Date: Day (Latest First)" name="group_by_create_date_day_desc" context="{'group_by':'create_date:day', 'orderedBy': [{'name': 'create_date', 'asc': False}]}"/>
                 <filter string="Creation Date: Month (Latest First)" name="group_by_create_date_month_desc" context="{'group_by':'create_date:month', 'orderedBy': [{'name': 'create_date', 'asc': False}]}"/>
+                <filter string="Update Date: Day (Latest First)" name="group_by_write_date_day_desc" context="{'group_by':'write_date:day', 'orderedBy': [{'name': 'write_date', 'asc': False}]}"/>
+                <filter string="Update Date: Month (Latest First)" name="group_by_write_date_month_desc" context="{'group_by':'write_date:month', 'orderedBy': [{'name': 'write_date', 'asc': False}]}"/>
+                <filter string="Activity Deadline (Ascending)" name="group_by_activity_deadline" context="{'group_by':'activity_date_deadline', 'orderedBy': [{'name': 'activity_date_deadline', 'asc': True}]}"/>
             </xpath>
+        </field>
+    </record>
+
+    <!-- Dedicated Tree / List View for 'Updated On' -->
+    <record id="crm_lead_view_tree_updated_on" model="ir.ui.view">
+        <field name="name">crm.lead.tree.updated.on</field>
+        <field name="model">crm.lead</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <list string="Updated Opportunities" sample="1" multi_edit="1" js_class="crm_business_cards_scanner_list" default_order="write_date desc, id desc" limit="1000">
+                <header>
+                    <button name="%(crm.crm_lead_lost_action)d" type="action" string="Mark Lost"/>
+                    <button name="%(crm.action_lead_mass_mail)d" type="action" string="Email"/>
+                </header>
+                <field name="priority" optional="show" widget="priority"/>
+                <field name="name" string="Opportunity" readonly="1"/>
+                <field name="contact_name" optional="show" string="Contact"/>
+                <field name="partner_name" optional="show" string="Organization"/>
+                <field name="phone" optional="show" class="o_force_ltr"/>
+                <field name="crm_product_id" string="Product Interest" optional="show"/>
+                <field name="user_id" widget="many2one_avatar_user" optional="show" domain="[('share', '=', False), ('active', '=', True)]"/>
+                <field name="custom_response_status" string="Response Status" optional="show"/>
+                <field name="custom_next_contact_date" string="Next Contact Date" optional="show"/>
+                <field name="write_date" string="Updated On" optional="show"/>
+                <field name="write_uid" string="Updated By" widget="many2one_avatar_user" optional="show"/>
+                <field name="last_chatter" string="Activities / Notes" optional="show"/>
+                <field name="stage_id" optional="show" widget="badge_rotting" string="Stage"/>
+                <field name="expected_revenue" sum="Expected Revenues" optional="show" widget="monetary"/>
+                <field name="create_date" string="Created On" optional="hide"/>
+                <field name="create_uid" string="Created By" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Dedicated Tree / List View for 'Overdue' -->
+    <record id="crm_lead_view_tree_overdue" model="ir.ui.view">
+        <field name="name">crm.lead.tree.overdue</field>
+        <field name="model">crm.lead</field>
+        <field name="priority">20</field>
+        <field name="arch" type="xml">
+            <list string="Overdue Leads" sample="1" multi_edit="1" js_class="crm_business_cards_scanner_list" default_order="activity_date_deadline asc, priority desc, id desc" limit="1000">
+                <header>
+                    <button name="%(crm.crm_lead_lost_action)d" type="action" string="Mark Lost"/>
+                    <button name="%(crm.action_lead_mass_mail)d" type="action" string="Email"/>
+                </header>
+                <field name="priority" optional="show" widget="priority"/>
+                <field name="name" string="Opportunity" readonly="1"/>
+                <field name="contact_name" optional="show" string="Contact"/>
+                <field name="partner_name" optional="show" string="Organization"/>
+                <field name="phone" optional="show" class="o_force_ltr"/>
+                <field name="crm_product_id" string="Product Interest" optional="show"/>
+                <field name="user_id" widget="many2one_avatar_user" optional="show" domain="[('share', '=', False), ('active', '=', True)]"/>
+                <field name="activity_date_deadline" string="Activity Deadline" widget="remaining_days" optional="show"/>
+                <field name="my_activity_date_deadline" string="My Deadline" widget="remaining_days" optional="hide"/>
+                <field name="custom_next_contact_date" string="Next Contact Date" optional="show"/>
+                <field name="custom_response_status" string="Response Status" optional="show"/>
+                <field name="last_chatter" string="Activities / Notes" optional="show"/>
+                <field name="stage_id" optional="show" widget="badge_rotting" string="Stage"/>
+                <field name="expected_revenue" sum="Expected Revenues" optional="show" widget="monetary"/>
+                <field name="write_date" string="Updated On" optional="hide"/>
+                <field name="create_date" string="Created On" optional="hide"/>
+            </list>
         </field>
     </record>
 
@@ -259,4 +362,88 @@
         <field name="view_mode">kanban</field>
         <field name="act_window_id" ref="crm.crm_lead_action_pipeline"/>
     </record>
+
+    <!-- Window Action: Updated On (Default: Updated Today) -->
+    <record id="action_crm_lead_updated_on" model="ir.actions.act_window">
+        <field name="name">Updated On</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">list,kanban,graph,pivot,calendar,activity,form</field>
+        <field name="search_view_id" ref="crm.view_crm_case_opportunities_filter"/>
+        <field name="view_id" ref="crm_lead_view_tree_updated_on"/>
+        <field name="limit">1000</field>
+        <field name="context">{
+            'default_type': 'opportunity',
+            'search_default_updated_today': 1,
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Leads &amp; Opportunities Updated Today
+            </p>
+            <p>
+                Track leads and opportunities by when they were recently edited or updated.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_crm_lead_updated_on_view_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="crm_lead_view_tree_updated_on"/>
+        <field name="act_window_id" ref="action_crm_lead_updated_on"/>
+    </record>
+
+    <!-- Window Action: Overdue (Default: Overdue Today & Past) -->
+    <record id="action_crm_lead_overdue" model="ir.actions.act_window">
+        <field name="name">Overdue</field>
+        <field name="res_model">crm.lead</field>
+        <field name="view_mode">list,kanban,graph,pivot,calendar,activity,form</field>
+        <field name="search_view_id" ref="crm.view_crm_case_opportunities_filter"/>
+        <field name="view_id" ref="crm_lead_view_tree_overdue"/>
+        <field name="limit">1000</field>
+        <field name="context">{
+            'default_type': 'opportunity',
+            'search_default_overdue_today_past': 1,
+        }</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Overdue Leads &amp; Opportunities
+            </p>
+            <p>
+                Follow up on opportunities with deadlines scheduled for today or earlier in the past.
+            </p>
+        </field>
+    </record>
+
+    <record id="action_crm_lead_overdue_view_tree" model="ir.actions.act_window.view">
+        <field name="sequence" eval="1"/>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="crm_lead_view_tree_overdue"/>
+        <field name="act_window_id" ref="action_crm_lead_overdue"/>
+    </record>
+
+    <!-- Top CRM Menu Items for Updated On and Overdue -->
+    <menuitem id="menu_crm_lead_updated_on"
+              name="Updated On"
+              parent="crm.crm_menu_root"
+              action="action_crm_lead_updated_on"
+              sequence="7"/>
+
+    <menuitem id="menu_crm_lead_overdue"
+              name="Overdue"
+              parent="crm.crm_menu_root"
+              action="action_crm_lead_overdue"
+              sequence="8"/>
+
+    <!-- Also under Sales menu for convenient access -->
+    <menuitem id="menu_crm_lead_updated_on_sales"
+              name="Updated On"
+              parent="crm.crm_menu_sales"
+              action="action_crm_lead_updated_on"
+              sequence="15"/>
+
+    <menuitem id="menu_crm_lead_overdue_sales"
+              name="Overdue"
+              parent="crm.crm_menu_sales"
+              action="action_crm_lead_overdue"
+              sequence="16"/>
 </odoo>
