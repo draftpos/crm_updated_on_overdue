@@ -209,10 +209,7 @@
                 <filter string="Deadline: This Month" name="deadline_this_month"
                         domain="[('activity_date_deadline', '&gt;=', context_today().strftime('%Y-%m-01')),
                                  ('activity_date_deadline', '&lt;=', (context_today() + relativedelta(months=1, day=1, days=-1)).strftime('%Y-%m-%d'))]"/>
-                <filter string="Deadline: This Year" name="deadline_this_year"
-                        domain="[('activity_date_deadline', '&gt;=', context_today().strftime('%Y-01-01')),
-                                 ('activity_date_deadline', '&lt;=', context_today().strftime('%Y-12-31'))]"/>
-                <filter string="Deadline (Date Drilldown)" name="filter_activity_date_deadline" date="activity_date_deadline"/>
+                <filter string="Expected Closing (Date Drilldown)" name="filter_date_deadline" date="date_deadline"/>
                 <separator/>
                 <!-- Update Date Filters -->
                 <filter string="Updated: Today" name="updated_today"
@@ -261,7 +258,6 @@
                 <filter string="Creation Date: Month (Latest First)" name="group_by_create_date_month_desc" context="{'group_by':'create_date:month', 'orderedBy': [{'name': 'create_date', 'asc': False}]}"/>
                 <filter string="Update Date: Day (Latest First)" name="group_by_write_date_day_desc" context="{'group_by':'write_date:day', 'orderedBy': [{'name': 'write_date', 'asc': False}]}"/>
                 <filter string="Update Date: Month (Latest First)" name="group_by_write_date_month_desc" context="{'group_by':'write_date:month', 'orderedBy': [{'name': 'write_date', 'asc': False}]}"/>
-                <filter string="Activity Deadline (Ascending)" name="group_by_activity_deadline" context="{'group_by':'activity_date_deadline', 'orderedBy': [{'name': 'activity_date_deadline', 'asc': True}]}"/>
             </xpath>
         </field>
     </record>
@@ -303,7 +299,7 @@
         <field name="model">crm.lead</field>
         <field name="priority">20</field>
         <field name="arch" type="xml">
-            <list string="Overdue Leads" sample="1" multi_edit="1" js_class="crm_business_cards_scanner_list" default_order="activity_date_deadline asc, priority desc, id desc" limit="1000">
+            <list string="Overdue Leads" sample="1" multi_edit="1" js_class="crm_business_cards_scanner_list" default_order="priority desc, create_date desc, id desc" limit="1000">
                 <header>
                     <button name="%(crm.crm_lead_lost_action)d" type="action" string="Mark Lost"/>
                     <button name="%(crm.action_lead_mass_mail)d" type="action" string="Email"/>
