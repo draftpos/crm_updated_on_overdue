@@ -10,7 +10,17 @@ QUICK_RESPONSES = {
 
 class CrmLead(models.Model):
     _inherit = 'crm.lead'
-    _order = 'priority desc, create_date desc, id desc'
+    _order = 'write_date desc, id desc'
+
+    def message_post(self, *args, **kwargs):
+        res = super().message_post(*args, **kwargs)
+        if self:
+            self.env.cr.execute(
+                "UPDATE crm_lead SET write_date = NOW() AT TIME ZONE 'UTC' WHERE id IN %s",
+                (tuple(self.ids),)
+            )
+            self.invalidate_recordset(['write_date'])
+        return res
 
     @api.model
     def web_read_group(self, domain, groupby, aggregates=(), limit=None, offset=0, order=None, **kwargs):
