@@ -16,10 +16,10 @@ class CrmLead(models.Model):
         res = super().message_post(*args, **kwargs)
         if self:
             self.env.cr.execute(
-                "UPDATE crm_lead SET write_date = NOW() AT TIME ZONE 'UTC' WHERE id IN %s",
-                (tuple(self.ids),)
+                "UPDATE crm_lead SET write_date = NOW() AT TIME ZONE 'UTC', write_uid = %s WHERE id IN %s",
+                (self.env.uid, tuple(self.ids),)
             )
-            self.invalidate_recordset(['write_date'])
+            self.invalidate_recordset(['write_date', 'write_uid'])
         return res
 
     @api.model

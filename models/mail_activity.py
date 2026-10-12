@@ -7,10 +7,10 @@ class MailActivity(models.Model):
     def _touch_leads(self, lead_ids):
         if lead_ids:
             self.env.cr.execute(
-                "UPDATE crm_lead SET write_date = NOW() AT TIME ZONE 'UTC' WHERE id IN %s",
-                (tuple(set(lead_ids)),)
+                "UPDATE crm_lead SET write_date = NOW() AT TIME ZONE 'UTC', write_uid = %s WHERE id IN %s",
+                (self.env.uid, tuple(set(lead_ids)),)
             )
-            self.env['crm.lead'].browse(lead_ids).invalidate_recordset(['write_date'])
+            self.env['crm.lead'].browse(lead_ids).invalidate_recordset(['write_date', 'write_uid'])
 
     @api.model_create_multi
     def create(self, vals_list):
