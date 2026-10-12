@@ -18,56 +18,92 @@
                 <button name="action_set_response_no_first_call" type="object" string="No Answer (1st Call)" class="btn-secondary" invisible="not active or probability == 0"/>
             </xpath>
 
-            <!-- Place the 3-column details directly in the main form area before the tabs -->
+            <!-- Replace the main oe_title with a clean Notebook containing Lead tab -->
+            <xpath expr="//div[hasclass('oe_title')]" position="replace">
+                <notebook>
+                    <!-- Main Lead Info Tab -->
+                    <page name="lead_page" string="Lead">
+                        <!-- Standard oe_title -->
+                        <div class="oe_title mw-100">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <h1 class="flex-grow-1">
+                                    <field class="text-break" options="{'line_breaks': False}" widget="text" name="name" placeholder="e.g. Product Pricing"/>
+                                </h1>
+                            </div>
+                            <h2 class="row g-0 pb-3 pb-sm-4">
+                                <div class="col-auto pb-2 pb-md-0 w-100 w-sm-auto" invisible="type == 'lead'">
+                                    <label for="expected_revenue" class="oe_edit_only"/>
+                                    <div class="d-flex flex-wrap align-items-baseline">
+                                        <field name="company_currency" invisible="1"/>
+                                        <field name="expected_revenue" class="o_input_13ch" widget="monetary" options="{'currency_field': 'company_currency'}"/>
+                                    </div>
+                                </div>
+                                <div class="col-auto">
+                                    <div id="probability" class="d-flex align-items-baseline">
+                                        <field name="is_automated_probability" invisible="1"/>
+                                        <field name="probability" widget="float" class="oe_inline o_input_6ch" readonly="won_status != 'pending'"/>
+                                        <span class="opacity-50 p-2"> %</span>
+                                    </div>
+                                </div>
+                            </h2>
+                        </div>
+
+                        <!-- Unified 3-column details -->
+                        <group col="3">
+                            <!-- Column 1: Contact & Basic Info -->
+                            <group string="Contact &amp; Basic Info">
+                                <field name="partner_id" string="Customer" widget="res_partner_many2one"/>
+                                <field name="contact_name" string="Contact / First Name"/>
+                                <field name="partner_name" string="Organization/Store Name"/>
+                                <field name="email_from" string="Email"/>
+                                <field name="phone" string="Phone"/>
+                                <field name="website" string="Website"/>
+                                <field name="source_id" string="Source"/>
+                                <field name="crm_product_id" string="Product Interest" options="{'no_create': True}" />
+                            </group>
+                            
+                            <!-- Column 2: Deal & Sales Info -->
+                            <group string="Deal &amp; Sales Info">
+                                <field name="user_id" string="Salesperson" domain="[('share', '=', False), ('active', '=', True)]"/>
+                                <field name="team_id" string="Sales Team"/>
+                                <field name="priority" widget="priority"/>
+                                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
+                                <field name="last_chatter" string="Last Chatter" readonly="1"/>
+                                <field name="custom_next_contact_date" string="Next Contact Date"/>
+                                <field name="custom_response_status" string="Response Status"/>
+                                <field name="custom_deal_size" string="Deal Size $"/>
+                                <field name="custom_quote" string="Quote"/>
+                                <field name="custom_quote_date" string="Quote Date"/>
+                                <field name="custom_proposal_status" string="Proposal"/>
+                                <field name="custom_proposal_date" string="Proposal Date"/>
+                            </group>
+
+                            <!-- Column 3: Address & Additional Info -->
+                            <group string="Address &amp; Additional Info">
+                                <field name="city" string="City/Town"/>
+                                <field name="street" string="Full Address"/>
+                                <field name="custom_technician" string="Technician"/>
+                                <field name="custom_type_of_business" string="Type of Business"/>
+                                <field name="custom_demo_done" string="Demo Done"/>
+                                <field name="custom_demo_type" string="Demo Done Online/Onsite" invisible="custom_demo_done != 'yes'"/>
+                            </group>
+                        </group>
+                    </page>
+                </notebook>
+            </xpath>
+
             <!-- Hide the standard Odoo 2-column top group to prevent duplicate layout -->
             <xpath expr="//sheet/group" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
 
-            <!-- Place our unified 3-column details directly in the main form area before the tabs -->
-            <xpath expr="//notebook" position="before">
-                <group col="3">
-                    <!-- Column 1: Contact & Basic Info -->
-                    <group string="Contact &amp; Basic Info">
-                        <field name="contact_name" string="First Name"/>
-                        <field name="partner_name" string="Organization/Store Name"/>
-                        <field name="email_from" string="Email"/>
-                        <field name="phone" string="Phone"/>
-                        <field name="website" string="Website"/>
-                        <field name="source_id" string="Source"/>
-                        <field name="crm_product_id" string="Product Interest" options="{'no_create': True}" />
-                    </group>
-                    
-                    <!-- Column 2: Deal & Sales Info -->
-                    <group string="Deal &amp; Sales Info">
-                        <field name="user_id" string="Salesperson" domain="[('share', '=', False), ('active', '=', True)]"/>
-                        <field name="team_id" string="Sales Team"/>
-                        <field name="priority" widget="priority"/>
-                        <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
-                        <field name="last_chatter" string="Last Chatter" readonly="1"/>
-                        <field name="custom_next_contact_date" string="Next Contact Date"/>
-                        <field name="custom_response_status" string="Response Status"/>
-                        <field name="custom_deal_size" string="Deal Size $"/>
-                        <field name="custom_quote" string="Quote"/>
-                        <field name="custom_quote_date" string="Quote Date"/>
-                        <field name="custom_proposal_status" string="Proposal"/>
-                        <field name="custom_proposal_date" string="Proposal Date"/>
-                    </group>
-
-                    <!-- Column 3: Address & Additional Info -->
-                    <group string="Address &amp; Additional Info">
-                        <field name="city" string="City/Town"/>
-                        <field name="street" string="Full Address"/>
-                        <field name="custom_technician" string="Technician"/>
-                        <field name="custom_type_of_business" string="Type of Business"/>
-                        <field name="custom_demo_done" string="Demo Done"/>
-                        <field name="custom_demo_type" string="Demo Done Online/Onsite" invisible="custom_demo_done != 'yes'"/>
-                    </group>
-                </group>
-            </xpath>
-
             <!-- Hide the extra information tab to keep the UI clean and prevent repetition -->
             <xpath expr="//page[@name='extra']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+
+            <!-- Hide the standard bottom notebook so there are no duplicate notebooks on the form -->
+            <xpath expr="//notebook[page[@name='internal_notes']]" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
 
